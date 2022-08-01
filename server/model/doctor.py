@@ -7,7 +7,7 @@ class Doctorregistration(Base):
     name = Column(String)
     username = Column(String)
     email = Column(String, unique=True)
-    mobile = Column(Integer)
+    mobile = Column(String)
     sector = Column(String)
     location = Column(String)
     address = Column(String)
