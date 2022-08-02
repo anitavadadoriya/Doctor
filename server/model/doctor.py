@@ -1,9 +1,12 @@
+from pickle import LONG
+
+
 from server.database import Base
 from sqlalchemy import Column,Integer,String
 
 class Doctorregistration(Base):
     __tablename__ = 'doctorregistration'
-    id  = Column(Integer, primary_key=True)
+    id  = Column(Integer, primary_key=True,index=True)
     name = Column(String)
     username = Column(String)
     email = Column(String, unique=True)

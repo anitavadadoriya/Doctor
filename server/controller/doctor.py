@@ -1,23 +1,20 @@
+
 from sqlalchemy.orm import Session
 from server.model.doctor import Doctorregistration
-from server.model.schema import DoctorSchema
+from server.model.schema import DoctorSchema,updateDoctorSchema
+
+
 from passlib.context import CryptContext
 
-from server.utils.image_hendler import image_upload
+
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def get_doctor(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Doctorregistration).offset(skip).limit(limit).all()
+from server.utils.image_hendler import image_upload
 
-def get_doctor_by_id(db: Session, doctorregistration_id: int):
-    return db.query(Doctorregistration).filter(Doctorregistration.id == doctorregistration_id).first()
-
-async def add_doctor(db: Session, doctordata : DoctorSchema ):
-
-    
-    img_path=await image_upload(doctordata.image)
-    
+def add_doctor(db: Session, doctordata : DoctorSchema ):
+   
     doctor = Doctorregistration(name=doctordata.name, 
                                 username=doctordata.username,
                                 email = doctordata.email,
@@ -27,32 +24,42 @@ async def add_doctor(db: Session, doctordata : DoctorSchema ):
                                 address = doctordata.address, 
                                 qualification = doctordata.qualification,
                                 fees = doctordata.fees, 
-                                image= img_path,
-                                password =  pwd_context.hash(doctordata.password))
-    db.add(doctor)  
+                                image= doctordata.image,
+                                password =  pwd_context.hash(doctordata.password) )
+    db.add(doctor)
     db.commit()
     db.refresh(doctor)
     return doctor
 
+def get_doctor(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(Doctorregistration).offset(skip).limit(limit).all()
 
-def update_doctor_data(db: Session, doctorregistration_id : int,name: str, username : str, email : str, mobile : int, sector : str, location : str ,
-                       address :str, qualification : str,fees : str, image: str):
-    doctor = get_doctor_by_id(db=db, doctorregistration_id=doctorregistration_id)
+def get_doctor_by_id(db: Session, d_id: int):
+    return db.query(Doctorregistration).filter(Doctorregistration.id == d_id).first()
+
+def update_doctor(db: Session, d_id: int, name: str, username: str,mobile=int,sector=str,location=str,address=str,qualification=str,fees=str,image=str):
+   
+    update_doctor = get_doctor_by_id(db=db, d_id=d_id)
+   
+    update_doctor.name = name,
+    update_doctor.username = username,
+    update_doctor.mobile = mobile,
+    update_doctor.sector = sector,
+    update_doctor.location = location,
+    update_doctor.address = address,
+    update_doctor.qualification = qualification,
+    update_doctor.fees = fees,
+    update_doctor.image = image,
     
-    doctor.name=name 
-    doctor.username=username,
-    doctor.email = email,
-    doctor.mobile = mobile,
-    doctor.sector = sector,
-    doctor.location = location,
-    doctor.address = address, 
-    doctor.qualification = qualification,
-    doctor.fees = fees, 
-    doctor.image= image,
-
     db.commit()
-    db.refresh(doctor)
-    return doctor
+    db.refresh(update_doctor)
+    return update_doctor
 
-def doctor_login(db: Session, loginemail:str ):
-    return db.query(Doctorregistration).filter(Doctorregistration.email == loginemail).first()
+def remove_doctor(db: Session, d_id: int):
+    delete_doctor = get_doctor_by_id(db=db, d_id=d_id)
+    db.delete(delete_doctor)
+    db.commit()
+
+
+def get_doctor_by_email(db: Session, emails: str):
+    return db.query(Doctorregistration).filter(Doctorregistration.email == emails).first()
